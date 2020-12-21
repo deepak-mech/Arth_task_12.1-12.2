@@ -1,0 +1,47 @@
+- hosts: myweb
+  tasks:
+  - name: "Install httpd"
+    package:
+            name: "httpd"
+            state: present
+   
+  - name: "Install php"
+    package:
+            name: "php"
+            state: present
+
+  - name: "Copying web page"
+    copy:
+            src: "index.php"
+            dest: "/var/www/html"
+    notify: web service
+
+  handlers:
+  - name: web service
+    service:
+            name: "httpd"
+            state: restarted
+
+- hosts: mylb
+  tasks: 
+  - name: "Install haproxy"
+    package:
+            name: "haproxy"
+            state: present
+
+  - name: "Permissive SELinux"
+    selinux:
+            policy: targeted
+            state: permissive
+
+  - name: "Copy haproxy conf. file"
+    template:
+            src: "haproxy.cfg"
+            dest: "/etc/haproxy/haproxy.cfg"
+          
+          
+  - name: "start lb service"
+    service:
+            name: "haproxy"
+            state: started
+
